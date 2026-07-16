@@ -978,9 +978,16 @@ void parse_onec_card(context_t *ctx, card_t *card, errors_list_t *errors)
   // see if this is an SY card, otherwise exit
   // TODO: add all onec_codes here, we currently only do SY
   if(strcmp(card->card_code, "SY") == 0) {
-    // make a copy of the string so we can mangle it
+    // make a copy of the string so we can mangle it. card_str can exceed
+    // MAX_LINE_LEN once continuation lines have been merged onto it, so copy
+    // with an explicit bound rather than an unchecked strcpy.
     char str[MAX_LINE_LEN];
-    strcpy(str, card->card_str + 2);
+    size_t src_len = strlen(card->card_str + 2);
+    if (src_len >= MAX_LINE_LEN) {
+      src_len = MAX_LINE_LEN - 1;
+    }
+    memcpy(str, card->card_str + 2, src_len);
+    str[src_len] = '\0';
 
     // Split on commas that are NOT inside parentheses, so mod(10,3) stays intact.
     char *p = str;
