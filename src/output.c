@@ -218,8 +218,10 @@ void write_deck_onec(const context_t *ctx, const deck_t *deck, FILE *file)
         // whitespace and the key
         fputs(" ", file);
         fputs(head->key, file);
-        // use the separator they used, or default to = because it's likely an SY
-        if (strcmp(&head->separator, "") != 0)
+        // use the separator they used, or default to = because it's likely an SY.
+        // separator is a single char, not a string: test it directly rather than
+        // via strcmp on its address (which reads past the byte into adjacent fields).
+        if (head->separator != '\0')
         {
           fputc(head->separator, file);
         }
@@ -1620,9 +1622,12 @@ static int write_structure(context_t *ctx, const deck_t *deck, FILE *file)
       last_patch_zw2 = card.f[6];
       last_patch_segs = card.i[2];
       last_patch_tag = card.i[1];
+      // card.i[2] is the patch-shape selector read from the deck; guard the
+      // lookup so a malformed value cannot index ipt[] out of bounds.
+      char patch_shape = (card.i[2] >= 0 && card.i[2] < (int)sizeof(ipt)) ? ipt[card.i[2]] : '?';
       fprintf(ctx->output_fp, "\n"
                               " %5d%c%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f",
-              num_patches, ipt[card.i[2]], card.f[1], card.f[2], card.f[3], card.f[4], card.f[5], card.f[6]);
+              num_patches, patch_shape, card.f[1], card.f[2], card.f[3], card.f[4], card.f[5], card.f[6]);
       break;
 
     case 7: // SM card, multiple-patch surface
@@ -1748,7 +1753,13 @@ static int write_structure(context_t *ctx, const deck_t *deck, FILE *file)
     }
   }
 
-  int iseg = (ctx->geometry.num_segs + ctx->geometry.num_patches) / (ctx->geometry.num_segs_sym + ctx->geometry.num_patches_sym);
+  // Number of symmetric cells = total (segments + patches) / cell size. The
+  // cell size is >= 1 for any valid structure; guard against a zero denominator
+  // (empty or malformed geometry) so this cannot divide by zero.
+  int sym_cell = ctx->geometry.num_segs_sym + ctx->geometry.num_patches_sym;
+  int iseg = (sym_cell != 0)
+                 ? (ctx->geometry.num_segs + ctx->geometry.num_patches) / sym_cell
+                 : 1;
   if (iseg != 1)
   {
     /*** may be error condition?? ***/
