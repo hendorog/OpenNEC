@@ -8,17 +8,17 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_DIR"
 
-CSV="test/speed_tests/speed_results.csv"
-TMP="test/speed_tests/.timing.tmp"
+CSV="tests/speed_tests/speed_results.csv"
+TMP="tests/speed_tests/.timing.tmp"
 : > "$CSV"
 echo "deck,segments,backend,real_seconds" >> "$CSV"
 
 DECKS=(
-  "test/speed_tests/speed_21.deck"
-  "test/speed_tests/speed_101.deck"
-  "test/speed_tests/speed_401.deck"
-  "test/speed_tests/speed_1001.deck"
-  "test/speed_tests/speed_4001.deck"
+  "tests/speed_tests/speed_21.deck"
+  "tests/speed_tests/speed_101.deck"
+  "tests/speed_tests/speed_401.deck"
+  "tests/speed_tests/speed_1001.deck"
+  "tests/speed_tests/speed_4001.deck"
 )
 
 build_backend() {

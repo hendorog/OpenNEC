@@ -2,10 +2,10 @@
 set -euo pipefail
 
 # Regression harness: builds selected backends and compares outputs across decks.
-# Outputs and report are stored under test/regression_tests/.
+# Outputs and report are stored under tests/regression_tests/.
 
 ROOT_DIR=$(cd "$(dirname "$0")"/../.. && pwd)
-REG_DIR="$ROOT_DIR/test/regression_tests"
+REG_DIR="$ROOT_DIR/tests/regression_tests"
 mkdir -p "$REG_DIR"
 
 # Timing setup
@@ -18,11 +18,11 @@ fi
 # Detect platform
 UNAME_S=$(uname -s || echo unknown)
 
-# Select decks: default to top-level test/*.deck and test/speed_tests/*.deck
+# Select decks: default to top-level tests/*.deck and tests/speed_tests/*.deck
 DECKS=()
-while IFS= read -r -d '' f; do DECKS+=("$f"); done < <(find "$ROOT_DIR/test" -maxdepth 1 -name '*.deck' -print0 | sort -z)
-if [ -d "$ROOT_DIR/test/speed_tests" ]; then
-  while IFS= read -r -d '' f; do DECKS+=("$f"); done < <(find "$ROOT_DIR/test/speed_tests" -maxdepth 1 -name '*.deck' -print0 | sort -z)
+while IFS= read -r -d '' f; do DECKS+=("$f"); done < <(find "$ROOT_DIR/tests" -maxdepth 1 -name '*.deck' -print0 | sort -z)
+if [ -d "$ROOT_DIR/tests/speed_tests" ]; then
+  while IFS= read -r -d '' f; do DECKS+=("$f"); done < <(find "$ROOT_DIR/tests/speed_tests" -maxdepth 1 -name '*.deck' -print0 | sort -z)
 fi
 
 # Allow user-specified decks via args
