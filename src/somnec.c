@@ -599,7 +599,7 @@ int shanks_integration(context_t *ctx, complex double start, complex double dela
 		if(ctx->somnec.gshank.den < ctx->somnec.gshank.denm)
 		  ctx->somnec.gshank.den=ctx->somnec.gshank.denm;
 		a1=q1[i][j]-a1;
-		ctx->somnec.gshank.amg=fabs(creal(a1)+fabs(cimag(a1)));
+		ctx->somnec.gshank.amg=fabs(creal(a1))+fabs(cimag(a1));
 		if(ctx->somnec.gshank.amg > ctx->somnec.gshank.den)
 		{
 		  brk = true;

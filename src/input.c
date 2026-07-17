@@ -889,6 +889,15 @@ void parse_geometry_or_control_card(context_t *ctx, card_t *card, errors_list_t 
         fld_name[2] = '\0';
         add_key_value(card, &card->formulas, fld_name, token, '=');
       }
+
+      // Some cards choose their float-field count based on an integer field:
+      // EX uses i[1] (the excitation type) to decide between 3 and 6 floats.
+      // MAX_FLTS was computed at the top of this function while i[1] was still
+      // zero, so recompute it now that the integer fields have been read,
+      // otherwise the trailing floats (e.g. plane-wave polarization) are dropped.
+      if(ints_processed == MAX_INTS) {
+        MAX_FLTS = max_flt_fields(card);
+      }
     } // end integer part
     
     // doubles are more complicated because the fields may contain other
