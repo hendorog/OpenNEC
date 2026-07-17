@@ -5,11 +5,11 @@ set -euo pipefail
 # different input path (SY symbols, inline formulas, mm/cm/AWG/inch radius units)
 # and must reproduce the literal baseline byte-for-byte after normalization.
 #
-# NOTE: this suite is intentionally NOT wired into `make test` / CI yet. The
-# engine currently exhibits a rare, ULP-level run-to-run non-determinism on the
-# example5 model (an uninitialized-read symptom noted in the correctness review),
-# which makes an exact-diff comparison flaky. Once that is fixed this becomes a
-# reliable gate; until then run it manually via `make test-formula`.
+# The engine's numeric output is fully deterministic (verified across 150 runs
+# and under MALLOC_PERTURB_/forced-stack-init poisoning); the only run-to-run
+# variation in a .out file is the wall-clock timing text ("RUN TIME =",
+# "FILL=... FACTOR=..." and their nec2c-format equivalents), which normalize()
+# strips. That makes byte-exact comparison a reliable gate.
 
 # Run baseline and all formula test decks, then compare outputs
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -32,8 +32,9 @@ XFAIL=0
 # so they are reported as expected-approximate rather than failures.
 KNOWN_APPROX="example5_awg_radius example5_in_radius"
 
-# Normalize output for comparison: strip CR, drop the free-text COMMENTS block
-# and the non-deterministic MATRIX TIMING block, drop run-time/data-card lines,
+# Normalize output for comparison: strip CR, drop the free-text COMMENTS block,
+# the MATRIX TIMING block, and every wall-clock timing line (the only
+# non-deterministic content in a .out file, in both output formats), then
 # canonicalize signed zeros and runs of spaces. Reads a filename, writes stdout.
 normalize() {
   sed 's/\r$//' "$1" | awk '
@@ -43,7 +44,8 @@ normalize() {
     /- - - ANTENNA INPUT PARAMETERS - - -/{tskip=0}
     skip==1 {next}
     tskip==1{next}
-    /TOTAL RUN TIME:/{next}
+    /RUN TIME/{next}
+    /FILL[:=].*FACTOR[:=]/{next}
     /DATA CARD No:/{next}
     {gsub(/-0\.0000/,"0.0000"); gsub(/  +/," "); print}
   '

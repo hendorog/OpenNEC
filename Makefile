@@ -322,10 +322,11 @@ clean:
 test: $(EXECUTABLE)
 	@echo "== error-message tests =="
 	@bash tests/error_tests/run_error_tests.sh
+	@echo ""
+	@echo "== formula regression tests =="
+	@bash tests/formula_tests/run_formula_tests.sh
 
-# Formula/unit regression suite. Not part of `make test` yet: it relies on
-# byte-exact output comparison, which is flaky against the engine's current
-# run-to-run non-determinism on the example5 model. Run it manually.
+# Run only the formula/unit regression suite.
 .PHONY: test-formula
 test-formula: $(EXECUTABLE)
 	@echo "== formula regression tests =="
@@ -370,7 +371,7 @@ help:
 	@echo "  make PREFIX=/opt install  # Install to /opt (Unix/Linux/macOS)"
 	@echo "  make PREFIX=D:\MyApps install  # Install to D:\MyApps (Windows)"
 	@echo "  make uninstall            # Remove installed files"
-	@echo "  make test                 # Build and run the error-message test suite"
+	@echo "  make test                 # Build and run the test suite (error + formula)"
 	@echo "  make test-formula         # Run the formula/unit regression suite"
 	@echo "  make clean                # Remove build artifacts"
 	@echo ""
