@@ -318,6 +318,20 @@ $(EXECUTABLE): src/main.o $(LIBRARY)
 clean:
 	rm -f $(LIB_OBJECTS) src/main.o $(LIBRARY) $(EXECUTABLE)
 
+.PHONY: test
+test: $(EXECUTABLE)
+	@echo "== error-message tests =="
+	@bash tests/error_tests/run_error_tests.sh
+	@echo ""
+	@echo "== formula regression tests =="
+	@bash tests/formula_tests/run_formula_tests.sh
+
+# Run only the formula/unit regression suite.
+.PHONY: test-formula
+test-formula: $(EXECUTABLE)
+	@echo "== formula regression tests =="
+	@bash tests/formula_tests/run_formula_tests.sh
+
 help:
 	@echo "OpenNEC Build System"
 	@echo "===================="
@@ -357,6 +371,8 @@ help:
 	@echo "  make PREFIX=/opt install  # Install to /opt (Unix/Linux/macOS)"
 	@echo "  make PREFIX=D:\MyApps install  # Install to D:\MyApps (Windows)"
 	@echo "  make uninstall            # Remove installed files"
+	@echo "  make test                 # Build and run the test suite (error + formula)"
+	@echo "  make test-formula         # Run the formula/unit regression suite"
 	@echo "  make clean                # Remove build artifacts"
 	@echo ""
 	@echo "Current platform: $(UNAME_S) / OS: $(OS)"
@@ -424,4 +440,4 @@ uninstall:
 	@echo "Uninstall complete!"
 endif
 
-.PHONY: all clean help debug install uninstall
+.PHONY: all clean help debug install uninstall test test-formula
