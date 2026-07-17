@@ -1476,11 +1476,15 @@ static void warn_segment_rules(const context_t *ctx, errors_list_t *errors,
 
     if (radius > 0.0)
     {
-      double min_r_by_seg = 0.5 * seg_len;
-      double min_r_by_wav = 0.1 * wavelength;
-      if (radius < min_r_by_seg || radius < min_r_by_wav)
+      /* Thin-wire validity requires the radius to be SMALL relative to the
+       * segment length and the wavelength; a fat wire violates the assumption.
+       * Warn when the radius EXCEEDS these limits (cf. check_segment_length_and_radius,
+       * which warns at radius >= segLen/2). */
+      double max_r_by_seg = 0.5 * seg_len;
+      double max_r_by_wav = 0.1 * wavelength;
+      if (radius >= max_r_by_seg || radius >= max_r_by_wav)
       {
-        snprintf(msg, sizeof(msg), "%s on line %d: wire radius %.6g is smaller than 0.5*segment length (%.6g) or 0.1*wavelength (%.6g).", code, line, radius, min_r_by_seg, min_r_by_wav);
+        snprintf(msg, sizeof(msg), "%s on line %d: wire radius %.6g is larger than 0.5*segment length (%.6g) or 0.1*wavelength (%.6g); this violates thin-wire assumptions.", code, line, radius, max_r_by_seg, max_r_by_wav);
         add_error(ctx, errors, msg, WARNING);
       }
     }
@@ -1502,17 +1506,17 @@ static void validate_geom_seg_info_list(const context_t *ctx, errors_list_t *err
     {
       double seg_len = g->total_len / (double)g->segs;
       double min_seg = 1.0e-4 * wavelength;
-      double min_r_by_seg = 0.5 * seg_len;
-      double min_r_by_wav = 0.1 * wavelength;
+      double max_r_by_seg = 0.5 * seg_len;
+      double max_r_by_wav = 0.1 * wavelength;
 
       if (seg_len < min_seg)
       {
         snprintf(msg, sizeof(msg), "%s on line %d: transformed geometry from %s line %d has segment length %.6g < 1e-4 wavelength (%.6g).", trigger_code, trigger_line, g->code, g->line, seg_len, min_seg);
         add_error(ctx, errors, msg, WARNING);
       }
-      if (g->radius > 0.0 && (g->radius < min_r_by_seg || g->radius < min_r_by_wav))
+      if (g->radius > 0.0 && (g->radius >= max_r_by_seg || g->radius >= max_r_by_wav))
       {
-        snprintf(msg, sizeof(msg), "%s on line %d: transformed geometry from %s line %d has radius %.6g smaller than 0.5*segment (%.6g) or 0.1*wavelength (%.6g).", trigger_code, trigger_line, g->code, g->line, g->radius, min_r_by_seg, min_r_by_wav);
+        snprintf(msg, sizeof(msg), "%s on line %d: transformed geometry from %s line %d has radius %.6g larger than 0.5*segment (%.6g) or 0.1*wavelength (%.6g); this violates thin-wire assumptions.", trigger_code, trigger_line, g->code, g->line, g->radius, max_r_by_seg, max_r_by_wav);
         add_error(ctx, errors, msg, WARNING);
       }
     }
