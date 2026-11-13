@@ -568,8 +568,8 @@ static int process_single_file(const char *input_filename, const char *output_fi
   {
     if ((input_fp = fopen(input_filename, "r")) == NULL)
     {
-      char mesg[88] = "onec: ";
-      strcat(mesg, input_filename);
+      char mesg[88];
+      snprintf(mesg, sizeof(mesg), "onec: %s", input_filename);
       perror(mesg);
       destroy_context(ctx);
       return -1;
@@ -601,8 +601,8 @@ static int process_single_file(const char *input_filename, const char *output_fi
     {
       if ((output_fp = fopen(output_filename, "w")) == NULL)
       {
-        char mesg[88] = "onec: ";
-        strcat(mesg, output_filename);
+        char mesg[88];
+        snprintf(mesg, sizeof(mesg), "onec: %s", output_filename);
         perror(mesg);
         if (input_fp != stdin)
           fclose(input_fp);
@@ -733,8 +733,8 @@ static int process_single_file(const char *input_filename, const char *output_fi
       } else {
         // Fall back to writing directly
         if ((output_fp = fopen(output_filename, "w")) == NULL) {
-          char mesg[88] = "onec: ";
-          strcat(mesg, output_filename);
+          char mesg[88];
+          snprintf(mesg, sizeof(mesg), "onec: %s", output_filename);
           perror(mesg);
           if (input_fp != stdin) fclose(input_fp);
           destroy_context(ctx);
@@ -920,8 +920,8 @@ static int process_single_file(const char *input_filename, const char *output_fi
       FILE *final_fp = fopen(output_filename, "wb");
       if (final_fp == NULL)
       {
-        char mesg[88] = "onec: ";
-        strcat(mesg, output_filename);
+        char mesg[88];
+        snprintf(mesg, sizeof(mesg), "onec: %s", output_filename);
         perror(mesg);
         conv_error = 1;
       }
@@ -1203,8 +1203,8 @@ int main(int argc, char **argv)
   {
     if ((error_fp = fopen(error_file, "w")) == NULL)
     {
-      char mesg[128] = "onec: ";
-      strcat(mesg, error_file);
+      char mesg[128];
+      snprintf(mesg, sizeof(mesg), "onec: %s", error_file);
       perror(mesg);
       exit(EXIT_FAILURE);
     }
